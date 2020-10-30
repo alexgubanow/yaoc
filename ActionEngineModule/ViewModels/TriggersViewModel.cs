@@ -14,6 +14,7 @@ using System.Windows.Data;
 using System.Xml.Linq;
 using System.Xml.Serialization;
 using tae;
+using tev;
 
 namespace ActionEngineModule.ViewModels
 {
@@ -47,25 +48,46 @@ namespace ActionEngineModule.ViewModels
             ea.GetEvent<TriggersUPDEvent>().Subscribe((value) => { Triggers.Clear(); Triggers.AddRange(value); });
             ea.GetEvent<CreateTriggerEvent>().Subscribe((value) => CreateActionTriggerRequest(value));
             ea.GetEvent<ModifyTriggerEvent>().Subscribe((value) => ModifyActionTriggerRequest(value));
-            while (System.Windows.Application.Current.Properties["AEclient"] == null)
+            while (System.Windows.Application.Current.Properties["TAEclient"] == null)
             {
 
             }
-            actionEngineClient = (ActionEnginePortClient)System.Windows.Application.Current.Properties["AEclient"];
+            actionEngineClient = (ActionEnginePortClient)System.Windows.Application.Current.Properties["TAEclient"];
+            GetEventProperties().ConfigureAwait(false);
         }
-        
         private void Create()
         {
-            _eventAggregator.GetEvent<Events.OpenDialogEvent>().Publish(new tae.ActionTrigger());
+            _eventAggregator.GetEvent<Events.OpenDialogEvent>().Publish(new ActionTrigger());
         }
+
+        private async Task GetEventProperties()
+        {
+            if (actionEngineClient != null && System.Windows.Application.Current.Properties["EventProperties"] == null)
+            {
+                try
+                {
+                    var tevClient = (EventPortTypeClient)System.Windows.Application.Current.Properties["TEVclient"];
+                    var task = tevClient.GetEventPropertiesAsync(new GetEventPropertiesRequest());
+                    await task.ConfigureAwait(false);
+                    System.Windows.Application.Current.Properties["EventProperties"] = task.Result;
+                }
+                catch (Exception ex)
+                {
+                    _eventAggregator.GetEvent<Events.NewStatusEvent>().Publish(ex.Message);
+                }
+            }
+        }
+
         private async void CreateActionTriggerRequest(ActionTriggerConfiguration item)
         {
             if (actionEngineClient != null && item != null)
             {
                 try
                 {
-                    var task = actionEngineClient.CreateActionTriggersAsync(new CreateActionTriggersRequest() {
-                        ActionTrigger = new ActionTriggerConfiguration[1] { item } });
+                    var task = actionEngineClient.CreateActionTriggersAsync(new CreateActionTriggersRequest()
+                    {
+                        ActionTrigger = new ActionTriggerConfiguration[1] { item }
+                    });
                     await task.ConfigureAwait(false);
                     UpdateList();
                 }

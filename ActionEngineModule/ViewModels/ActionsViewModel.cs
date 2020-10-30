@@ -45,12 +45,11 @@ namespace ActionEngineModule.ViewModels
             Actions = new ObservableCollection<tae.Action>();
             BindingOperations.EnableCollectionSynchronization(Actions, _lock);
             ea.GetEvent<ActionsUPDEvent>().Subscribe((value) => { Actions.Clear(); Actions.AddRange(value); });
-            while (System.Windows.Application.Current.Properties["AEclient"] == null)
+            while (System.Windows.Application.Current.Properties["TAEclient"] == null)
             {
 
             }
-            actionEngineClient = (ActionEnginePortClient)System.Windows.Application.Current.Properties["AEclient"];
-            //UpdateList();
+            actionEngineClient = (ActionEnginePortClient)System.Windows.Application.Current.Properties["TAEclient"];
         }
         public static System.Xml.XmlNode[] SerializeToXmlElement(object o)
         {

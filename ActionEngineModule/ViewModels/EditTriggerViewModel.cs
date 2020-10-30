@@ -1,36 +1,30 @@
 ﻿using Prism.Commands;
 using Prism.Events;
 using Prism.Mvvm;
-using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
-using System.Net;
-using System.ServiceModel;
-using System.ServiceModel.Channels;
-using System.Text;
-using System.Threading.Tasks;
-using System.Windows.Data;
-using System.Xml.Linq;
+using System.Xml;
 using System.Xml.Serialization;
 using tae;
+using tev;
 
 namespace ActionEngineModule.ViewModels
 {
     public class CreateTriggerEvent : PubSubEvent<ActionTriggerConfiguration> { }
     public class ModifyTriggerEvent : PubSubEvent<ActionTrigger> { }
+    public class Topic
+    {
+        public bool IsChecked { get; set; }
+        public string Data { get; set; }
+    }
     public class EditTriggerViewModel : BindableBase
     {
         private IEventAggregator _eventAggregator;
         public DelegateCommand<object> OkCMD { get; private set; }
         public DelegateCommand<object> CloseCMD { get; private set; }
+        public DelegateCommand DropDownMenuItemCheckedCMD { get; private set; }
 
-        private string _Topic;
-        public string Topic
-        {
-            get { return _Topic; }
-            set { SetProperty(ref _Topic, value); }
-        }
         private string _Token;
         public string Token
         {
@@ -43,54 +37,137 @@ namespace ActionEngineModule.ViewModels
             get { return _IsNew; }
             set { SetProperty(ref _IsNew, value); }
         }
+        private string _TopicExpr;
+        public string TopicExpr
+        {
+            set { SetProperty(ref _TopicExpr, value); }
+            get { return _TopicExpr; }
+        }
+        private string _ContentExpr;
+        public string ContentExpr
+        {
+            set { SetProperty(ref _ContentExpr, value); }
+            get { return _ContentExpr; }
+        }
+        private ObservableCollection<Topic> _Topics;
+        public ObservableCollection<Topic> Topics
+        {
+            get { return _Topics; }
+            set { SetProperty(ref _Topics, value); }
+        }
+
         EditTriggerViewModel(IEventAggregator ea)
         {
             _eventAggregator = ea;
             OkCMD = new DelegateCommand<object>(Create);
             CloseCMD = new DelegateCommand<object>(Close);
+            DropDownMenuItemCheckedCMD = new DelegateCommand(TopicsToString);
+            var evpr = (GetEventPropertiesResponse)System.Windows.Application.Current.Properties["EventProperties"];
+            var rawTopics = new List<Topic>();
+            foreach (var item in evpr.TopicSet.Any)
+            {
+                rawTopics.Add(new Topic() { IsChecked = false, Data = item.Name + "//." });
+                foreach (XmlElement childTopic in item.ChildNodes)
+                {
+                    rawTopics.Add(new Topic() { IsChecked = false, Data = item.Name + "/" + childTopic.Name });
+                }
+            }
+            Topics = new ObservableCollection<Topic>(rawTopics);
         }
-        public static System.Xml.XmlNode[] SerializeToXmlElement(object o)
+        public void TopicsToString()
         {
-            System.Xml.XmlDocument doc = new System.Xml.XmlDocument();
-            using (System.Xml.XmlWriter writer = doc.CreateNavigator().AppendChild())
+            string b = "";
+            foreach (var item in Topics.Where(item => item.IsChecked))
+            {
+                b += item.Data + '|';
+            }
+            if (b.Length > 0)
+            {
+                b = b.Remove(b.Length - 1);
+            }
+            TopicExpr = b;
+        }
+        public void SetUsedTopicsFromString(string value)
+        {
+            var usedTopics = value.Split('|');
+            foreach (var item in usedTopics)
+            {
+                foreach (var topicFromList in from topicFromList in Topics
+                                              where topicFromList.Data == item
+                                              select topicFromList)
+                {
+                    topicFromList.IsChecked = true;
+                }
+            }
+        }
+        public static XmlNode[] SerializeToXmlElement(object o)
+        {
+            XmlDocument doc = new XmlDocument();
+            using (XmlWriter writer = doc.CreateNavigator().AppendChild())
             {
                 new XmlSerializer(o.GetType()).Serialize(writer, o);
             }
-            return new System.Xml.XmlNode[1] { doc.DocumentElement.LastChild };
+            return new XmlNode[1] { doc.DocumentElement.LastChild };
         }
         private void Create(object sender)
         {
             if (IsNew)
             {
                 ActionTriggerConfiguration item =
-                            new ActionTriggerConfiguration()
-                            {
-                                TopicExpression = new TopicExpressionType()
-                                {
-                                    Any = SerializeToXmlElement(Topic),
-                                    Dialect = "http://docs.oasis-open.org/wsn/t-1/TopicExpression/ConcreteSet"
-                                }
-                            };
+                    new ActionTriggerConfiguration()
+                    {
+                        TopicExpression = GetTopicExpressionType(),
+                        ContentExpression = GetQueryExpressionType()
+                    };
                 _eventAggregator.GetEvent<CreateTriggerEvent>().Publish(item);
             }
             else
             {
                 ActionTrigger item =
-                            new ActionTrigger()
-                            {
-                                Configuration = new ActionTriggerConfiguration() {
-                                    TopicExpression = new TopicExpressionType()
-                                    {
-                                        Any = SerializeToXmlElement(Topic),
-                                        Dialect = "http://docs.oasis-open.org/wsn/t-1/TopicExpression/ConcreteSet"
-                                    }
-                                },
-                                Token = Token
-                            };
+                    new ActionTrigger()
+                    {
+                        Configuration = new ActionTriggerConfiguration()
+                        {
+                            TopicExpression = GetTopicExpressionType(),
+                            ContentExpression = GetQueryExpressionType()
+                        },
+                        Token = Token
+                    };
                 _eventAggregator.GetEvent<ModifyTriggerEvent>().Publish(item);
             }
             Close(sender);
         }
+
+        private tae.QueryExpressionType GetQueryExpressionType()
+        {
+            tae.QueryExpressionType queryExpressionType = null;
+            if (ContentExpr.Length > 0)
+            {
+                queryExpressionType = new tae.QueryExpressionType()
+                {
+                    Any = SerializeToXmlElement(ContentExpr),
+                    Dialect = "http://www.onvif.org/ver10/tev/messageContentFilter/ItemFilter"
+                };
+            }
+
+            return queryExpressionType;
+        }
+
+        private tae.TopicExpressionType GetTopicExpressionType()
+        {
+            tae.TopicExpressionType topicExpressionType = null;
+            if (TopicExpr.Length > 0)
+            {
+                topicExpressionType = new tae.TopicExpressionType()
+                {
+                    Any = SerializeToXmlElement(TopicExpr),
+                    Dialect = "http://docs.oasis-open.org/wsn/t-1/TopicExpression/ConcreteSet"
+                };
+            }
+
+            return topicExpressionType;
+        }
+
         private void Close(object sender)
         {
             _eventAggregator.GetEvent<Events.CloseDialogEvent>().Publish(sender);

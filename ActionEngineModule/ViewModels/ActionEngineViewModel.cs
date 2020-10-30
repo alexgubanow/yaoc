@@ -2,45 +2,49 @@
 using Prism.Events;
 using Prism.Mvvm;
 using System;
-using System.Collections.Generic;
-using System.Collections.ObjectModel;
-using System.Linq;
 using System.Net;
 using System.ServiceModel;
 using System.ServiceModel.Channels;
-using System.Text;
-using System.Threading.Tasks;
-using System.Windows.Data;
-using System.Xml.Linq;
-using System.Xml.Serialization;
 using tae;
+using tds;
+using tev;
 
 namespace ActionEngineModule.ViewModels
 {
     class ActionEngineViewModel : BindableBase
     {
         private IEventAggregator _ea;
-        private ActionEnginePortClient AEclient;
+        public DelegateCommand CreateOnvifClientsCMD { get; private set; }
         ActionEngineViewModel(IEventAggregator ea)
         {
             _ea = ea;
+            CreateOnvifClientsCMD = new DelegateCommand(CreateOnvifClients);            
+        }
+        private async void CreateOnvifClients()
+        {
             if (System.Windows.Application.Current.Properties["Endpoint"] == null)
             {
                 return;
             }
             var messageElement = new TextMessageEncodingBindingElement
             {
-                MessageVersion = MessageVersion.CreateVersion(EnvelopeVersion.Soap12, AddressingVersion.None)
+                MessageVersion = MessageVersion.CreateVersion(EnvelopeVersion.Soap12, AddressingVersion.WSAddressing10)
             };
             var httpBinding = new HttpTransportBindingElement
             {
-                AuthenticationScheme = AuthenticationSchemes.Basic
+                AuthenticationScheme = AuthenticationSchemes.Digest
             };
+            var binding = new CustomBinding(messageElement, httpBinding);
+            var TDSclient = new DeviceClient(binding,
+                new EndpointAddress((string)System.Windows.Application.Current.Properties["Endpoint"]));
+            var allCapabilitiesTask = TDSclient.GetCapabilitiesAsync(new CapabilityCategory[] { CapabilityCategory.All });
+            await allCapabilitiesTask.ConfigureAwait(false);
             var mediaAddress = new EndpointAddress((string)System.Windows.Application.Current.Properties["Endpoint"]);
-            AEclient = new ActionEnginePortClient(new CustomBinding(messageElement, httpBinding), mediaAddress);
-            AEclient.ClientCredentials.UserName.UserName = "admin";
-            AEclient.ClientCredentials.UserName.Password = "admin";
-            System.Windows.Application.Current.Properties["AEclient"] = AEclient;
+            var TEVclient = new EventPortTypeClient(binding, mediaAddress);
+            var TAEclient = new ActionEnginePortClient(binding, mediaAddress);
+            System.Windows.Application.Current.Properties["TAEclient"] = TAEclient;
+            System.Windows.Application.Current.Properties["TEVclient"] = TEVclient;
+            System.Windows.Application.Current.Properties["TDSclient"] = TDSclient;
         }
     }
 }
