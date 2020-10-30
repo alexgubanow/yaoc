@@ -50,7 +50,7 @@ namespace ActionEngineModule.ViewModels
 
             }
             actionEngineClient = (ActionEnginePortClient)System.Windows.Application.Current.Properties["AEclient"];
-            UpdateList();
+            //UpdateList();
         }
         public static System.Xml.XmlNode[] SerializeToXmlElement(object o)
         {

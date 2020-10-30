@@ -1,14 +1,15 @@
 ﻿using System;
 using System.Windows;
 using System.Windows.Data;
+using System.Xml;
 
 namespace ActionEngineModule.Views
 {
-    class TopicExpressionToString : IValueConverter
+    public class TopicExpressionToString : IValueConverter
     {
-        public object Convert(object value, Type targetType, object parameter, System.Globalization.CultureInfo culture)
+        public static string ToString(XmlNode[] value)
         {
-            System.Xml.XmlNode[] a = (System.Xml.XmlNode[])value;
+            XmlNode[] a = value;
             string b = "";
             foreach (var item in a)
             {
@@ -16,6 +17,10 @@ namespace ActionEngineModule.Views
             }
             b = b.Remove(b.Length - 1);
             return b;
+        }
+        public object Convert(object value, Type targetType, object parameter, System.Globalization.CultureInfo culture)
+        {
+            return ToString((XmlNode[])value);
         }
         public object ConvertBack(object value, Type targetTypes, object parameter, System.Globalization.CultureInfo culture)
         {

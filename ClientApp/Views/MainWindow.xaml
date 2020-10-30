@@ -4,7 +4,7 @@
                  xmlns:mah="http://metro.mahapps.com/winfx/xaml/controls"
         xmlns:prism="http://prismlibrary.com/" xmlns:lcl="clr-namespace:ClientApp.Views"
         prism:ViewModelLocator.AutoWireViewModel="True"
-        Title="{Binding Title}" Height="600" Width="800">
+        Title="{Binding Title}" Height="600" Width="800" ShowDialogsOverTitleBar="False">
     <DockPanel LastChildFill="True">
         <StatusBar DockPanel.Dock="Bottom">
             <StatusBarItem Content="{Binding StatusTXT}" Height="30"/>

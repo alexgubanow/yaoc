@@ -45,33 +45,27 @@ namespace ActionEngineModule.ViewModels
             Triggers = new ObservableCollection<ActionTrigger>();
             BindingOperations.EnableCollectionSynchronization(Triggers, _lock);
             ea.GetEvent<TriggersUPDEvent>().Subscribe((value) => { Triggers.Clear(); Triggers.AddRange(value); });
+            ea.GetEvent<CreateTriggerEvent>().Subscribe((value) => CreateActionTriggerRequest(value));
+            ea.GetEvent<ModifyTriggerEvent>().Subscribe((value) => ModifyActionTriggerRequest(value));
             while (System.Windows.Application.Current.Properties["AEclient"] == null)
             {
 
             }
             actionEngineClient = (ActionEnginePortClient)System.Windows.Application.Current.Properties["AEclient"];
-            UpdateList();
         }
-        public static System.Xml.XmlNode[] SerializeToXmlElement(object o)
+        
+        private void Create()
         {
-            System.Xml.XmlDocument doc = new System.Xml.XmlDocument();
-            using (System.Xml.XmlWriter writer = doc.CreateNavigator().AppendChild())
-            {
-                new XmlSerializer(o.GetType()).Serialize(writer, o);
-            }
-            return new System.Xml.XmlNode[1] { doc.DocumentElement.LastChild };
+            _eventAggregator.GetEvent<Events.OpenDialogEvent>().Publish(new tae.ActionTrigger());
         }
-        private async void Create()
+        private async void CreateActionTriggerRequest(ActionTriggerConfiguration item)
         {
-            if (actionEngineClient != null)
+            if (actionEngineClient != null && item != null)
             {
                 try
                 {
-                    ActionTriggerConfiguration[] tmp = new ActionTriggerConfiguration[1] {
-                        new ActionTriggerConfiguration() { TopicExpression = new TopicExpressionType() {
-                            Any = SerializeToXmlElement("tns1:RecordingConfig/JobState"),
-                            Dialect = "http://docs.oasis-open.org/wsn/t-1/TopicExpression/ConcreteSet" } } };
-                    var task = actionEngineClient.CreateActionTriggersAsync(new CreateActionTriggersRequest() { ActionTrigger = tmp });
+                    var task = actionEngineClient.CreateActionTriggersAsync(new CreateActionTriggersRequest() {
+                        ActionTrigger = new ActionTriggerConfiguration[1] { item } });
                     await task.ConfigureAwait(false);
                     UpdateList();
                 }
@@ -81,13 +75,17 @@ namespace ActionEngineModule.ViewModels
                 }
             }
         }
-        private async void Edit(ActionTrigger item)
+        private void Edit(ActionTrigger item)
+        {
+            _eventAggregator.GetEvent<Events.OpenDialogEvent>().Publish(item);
+        }
+        private async void ModifyActionTriggerRequest(ActionTrigger item)
         {
             if (item != null && actionEngineClient != null)
             {
                 try
                 {
-                    ActionTrigger[] tmp = new ActionTrigger[1] { new ActionTrigger() };
+                    ActionTrigger[] tmp = new ActionTrigger[1] { item };
                     var task = actionEngineClient.ModifyActionTriggersAsync(tmp);
                     await task.ConfigureAwait(false);
                     UpdateList();
