@@ -1,6 +1,7 @@
 ﻿using ClientApp.Views;
 using Prism.Ioc;
 using Prism.Modularity;
+using System;
 using System.Windows;
 
 namespace ClientApp
@@ -18,6 +19,10 @@ namespace ClientApp
         protected override void RegisterTypes(IContainerRegistry containerRegistry)
         {
 
+        }
+        protected override IModuleCatalog CreateModuleCatalog()
+        {
+            return new ConfigurationModuleCatalog();
         }
     }
 }

@@ -1,0 +1,16 @@
+﻿<UserControl x:Name="parent" x:Class="ClientApp.Views.lblTextBox"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:local="clr-namespace:ClientApp.Views"
+        xmlns:prism="http://prismlibrary.com/"
+        prism:ViewModelLocator.AutoWireViewModel="True"
+             mc:Ignorable="d" 
+             d:DesignHeight="25" d:DesignWidth="120">
+    <StackPanel Orientation="Horizontal">
+        <Label Content="{Binding Path=Header, RelativeSource={RelativeSource AncestorType=UserControl}}"/>
+        <TextBox MinWidth="{Binding Path=lblWidth, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                 Text="{Binding Path=lblText, RelativeSource={RelativeSource AncestorType=UserControl}}"/>
+    </StackPanel>
+</UserControl>

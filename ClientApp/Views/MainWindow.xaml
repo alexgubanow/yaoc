@@ -1,10 +1,29 @@
-﻿<Window x:Class="ClientApp.Views.MainWindow"
+﻿<mah:MetroWindow x:Class="ClientApp.Views.MainWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-        xmlns:prism="http://prismlibrary.com/"
+                 xmlns:mah="http://metro.mahapps.com/winfx/xaml/controls"
+        xmlns:prism="http://prismlibrary.com/" xmlns:lcl="clr-namespace:ClientApp.Views"
         prism:ViewModelLocator.AutoWireViewModel="True"
-        Title="{Binding Title}" Height="350" Width="525">
-    <Grid>
-        <ContentControl prism:RegionManager.RegionName="ContentRegion" />
-    </Grid>
-</Window>
+        Title="{Binding Title}" Height="600" Width="800">
+    <DockPanel LastChildFill="True">
+        <StatusBar DockPanel.Dock="Bottom">
+            <StatusBarItem Content="{Binding StatusTXT}" Height="30"/>
+        </StatusBar>
+        <StackPanel Orientation="Horizontal" DockPanel.Dock="Top">
+            <StatusBarItem>
+                <lcl:lblTextBox Header="Endpoint" lblWidth="120" lblText="{Binding Endpoint}"/>
+            </StatusBarItem>
+            <StatusBarItem>
+                <lcl:lblTextBox Header="User" lblWidth="80" lblText="{Binding User}"/>
+            </StatusBarItem>
+            <StatusBarItem>
+                <lcl:lblTextBox Header="Password" lblWidth="80" lblText="{Binding Password}"/>
+            </StatusBarItem>
+        </StackPanel>
+        <TabControl TabStripPlacement="Left" mah:TabControlHelper.Underlined="TabItems" >
+            <TabItem Header="ActionEngine" mah:HeaderedControlHelper.HeaderFontSize="14" >
+                <ContentControl prism:RegionManager.RegionName="ActionEngineRegion" />
+            </TabItem>
+        </TabControl>
+    </DockPanel>
+</mah:MetroWindow>
