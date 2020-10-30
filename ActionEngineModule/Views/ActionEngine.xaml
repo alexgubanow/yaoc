@@ -11,39 +11,10 @@
              prism:ViewModelLocator.AutoWireViewModel="True" >
     <TabControl mah:TabControlHelper.Underlined="TabItems">
         <TabItem Header="Triggers" mah:HeaderedControlHelper.HeaderFontSize="14">
-            <DockPanel LastChildFill="True">
-                <StackPanel Orientation="Horizontal" DockPanel.Dock="Bottom">
-                    <Button Content="Create" Margin="5,5,0,5" Command="{Binding CreateTriggerCMD}"/>
-                    <Button Content="Update" Margin="5,5,0,5" Command="{Binding UpdateCMD}"/>
-                </StackPanel>
-                <ListBox Name="lbTodoList" HorizontalContentAlignment="Stretch" DockPanel.Dock="Top" ItemsSource="{Binding Triggers}">
-                    <ListBox.ItemTemplate>
-                        <DataTemplate>
-                            <StackPanel>
-                                <StackPanel Orientation="Horizontal">
-                                    <Label Content="Token:"/>
-                                    <Label Content="{Binding Token}"/>
-                                </StackPanel>
-                                <StackPanel Orientation="Horizontal">
-                                    <Label Content="Topic:"/>
-                                    <Label Content="{Binding TopicExpression}"/>
-                                </StackPanel>
-                            </StackPanel>
-                        </DataTemplate>
-                    </ListBox.ItemTemplate>
-                    <ListBox.ContextMenu>
-                        <ContextMenu>
-                            <MenuItem Header="Edit" Command="{Binding EditTriggerCMD}" 
-                              CommandParameter="{Binding RelativeSource={RelativeSource AncestorType={x:Type ContextMenu}},
-                                Path=PlacementTarget.SelectedItem}"/>
-                            <MenuItem Header="Delete" Command="{Binding DeleteTriggerCMD}" 
-                              CommandParameter="{Binding RelativeSource={RelativeSource AncestorType={x:Type ContextMenu}},
-                                Path=PlacementTarget.SelectedItem}"/>
-                        </ContextMenu>
-                    </ListBox.ContextMenu>
-                </ListBox>
-            </DockPanel>
+            <ContentControl prism:RegionManager.RegionName="TriggersRegion" />
         </TabItem>
-        <TabItem Header="Actions" mah:HeaderedControlHelper.HeaderFontSize="14"/>
+        <TabItem Header="Actions" mah:HeaderedControlHelper.HeaderFontSize="14">
+            <ContentControl prism:RegionManager.RegionName="ActionsRegion" />
+        </TabItem>
     </TabControl>
 </UserControl>

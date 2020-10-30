@@ -11,6 +11,8 @@ namespace ActionEngineModule
         {
             var regionManager = containerProvider.Resolve<IRegionManager>();
             regionManager.RegisterViewWithRegion("ActionEngineRegion", typeof(ActionEngine));
+            regionManager.RegisterViewWithRegion("TriggersRegion", typeof(Triggers));
+            regionManager.RegisterViewWithRegion("ActionsRegion", typeof(Actions));
         }
 
         public void RegisterTypes(IContainerRegistry containerRegistry)
