@@ -36,6 +36,19 @@
                 <TextBlock Text="{Binding TopicExpr}" TextWrapping="Wrap"/>
                 <Label Content="Content expression:"/>
                 <TextBox Text="{Binding ContentExpr}" TextWrapping="Wrap"/>
+                <mah:DropDownButton Content="Choose actions from list" 
+                          ItemsSource="{Binding Topics}">
+                    <mah:DropDownButton.ItemTemplate>
+                        <DataTemplate>
+                            <StackPanel Orientation="Horizontal">
+                                <CheckBox VerticalAlignment="Center" Margin="0,0,4,0" IsChecked="{Binding IsChecked}"
+                                          Command="{Binding RelativeSource={RelativeSource AncestorType={x:Type mah:DropDownButton}},
+                                    Path=DataContext.DropDownMenuItemCheckedCMD}"/>
+                                <TextBlock Text="{Binding Data}" VerticalAlignment="Center"/>
+                            </StackPanel>
+                        </DataTemplate>
+                    </mah:DropDownButton.ItemTemplate>
+                </mah:DropDownButton>
             </StackPanel>
         </StackPanel>
     </DockPanel>

@@ -27,11 +27,11 @@ namespace ClientApp.Views
         }
         private async void ShowDialog(object item)
         {
-            tae.ActionTrigger data = (tae.ActionTrigger)item;
             object control = null;
             string title = "";
-            if (data != null)
+            if (item is tae.ActionTrigger)
             {
+                tae.ActionTrigger data = (tae.ActionTrigger)item;
                 control = new EditTrigger();
                 var dc = ((control as EditTrigger).DataContext as EditTriggerViewModel);
                 dc.IsNew = data.Token == null;
@@ -54,11 +54,29 @@ namespace ClientApp.Views
                     title = "Create new trigger";
                 }
             }
+            else if (item is tae.Action)
+            {
+                tae.Action data = (tae.Action)item;
+                control = new EditAction();
+                var dc = ((control as EditAction).DataContext as EditActionViewModel);
+                dc.IsNew = data.Token == null;
+                if (data.Token != null)
+                {
+                    title = "Edit action: " + data.Token;
+                    dc.Token = data.Token;
+                    dc.Name = data.Configuration.Name;
+                    dc.SelectedActionType = data.Configuration.Type;
+                }
+                else
+                {
+                    title = "Create new action";
+                }
+            }
             if (control == null)
             {
                 return;
             }
-            var dialog = new CustomDialog(new MetroDialogSettings() { AnimateHide = false, AnimateShow = false }) 
+            var dialog = new CustomDialog(new MetroDialogSettings() { AnimateHide = false, AnimateShow = false })
             { Content = control, Title = title, DialogTitleFontSize = 18 };
 
             await this.ShowMetroDialogAsync(dialog);

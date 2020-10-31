@@ -20,7 +20,7 @@ namespace ActionEngineModule.ViewModels
     }
     public class EditTriggerViewModel : BindableBase
     {
-        private IEventAggregator _eventAggregator;
+        private readonly IEventAggregator _eventAggregator;
         public DelegateCommand<object> OkCMD { get; private set; }
         public DelegateCommand<object> CloseCMD { get; private set; }
         public DelegateCommand DropDownMenuItemCheckedCMD { get; private set; }

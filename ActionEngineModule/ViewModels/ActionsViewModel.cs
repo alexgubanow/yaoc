@@ -11,6 +11,7 @@ using System.ServiceModel.Channels;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Data;
+using System.Xml;
 using System.Xml.Linq;
 using System.Xml.Serialization;
 using tae;
@@ -28,7 +29,6 @@ namespace ActionEngineModule.ViewModels
             get { return _Actions; }
             set { SetProperty(ref _Actions, value); }
         }
-
         public DelegateCommand<tae.Action> EditCMD { get; private set; }
         public DelegateCommand<tae.Action> DeleteCMD { get; private set; }
         public DelegateCommand CreateCMD { get; private set; }
@@ -45,11 +45,50 @@ namespace ActionEngineModule.ViewModels
             Actions = new ObservableCollection<tae.Action>();
             BindingOperations.EnableCollectionSynchronization(Actions, _lock);
             ea.GetEvent<ActionsUPDEvent>().Subscribe((value) => { Actions.Clear(); Actions.AddRange(value); });
+            ea.GetEvent<CreateActionEvent>().Subscribe((value) => CreateActionRequest(value));
+            ea.GetEvent<ModifyActionEvent>().Subscribe((value) => ModifyActionRequest(value));
             while (System.Windows.Application.Current.Properties["TAEclient"] == null)
             {
 
             }
             actionEngineClient = (ActionEnginePortClient)System.Windows.Application.Current.Properties["TAEclient"];
+            GetSupportedActions().ConfigureAwait(false);
+        }
+        private async void CreateActionRequest(ActionConfiguration item)
+        {
+            if (actionEngineClient != null && item != null)
+            {
+                try
+                {
+                    var task = actionEngineClient.CreateActionsAsync(new CreateActionsRequest()
+                    {
+                        Action = new ActionConfiguration[1] { item }
+                    });
+                    await task.ConfigureAwait(false);
+                    UpdateList();
+                }
+                catch (Exception ex)
+                {
+                    _eventAggregator.GetEvent<Events.NewStatusEvent>().Publish(ex.Message);
+                }
+            }
+        }
+        private async void ModifyActionRequest(tae.Action item)
+        {
+            if (item != null && actionEngineClient != null)
+            {
+                try
+                {
+                    tae.Action[] tmp = new tae.Action[1] { item };
+                    var task = actionEngineClient.ModifyActionsAsync(tmp);
+                    await task.ConfigureAwait(false);
+                    UpdateList();
+                }
+                catch (Exception ex)
+                {
+                    _eventAggregator.GetEvent<Events.NewStatusEvent>().Publish(ex.Message);
+                }
+            }
         }
         public static System.Xml.XmlNode[] SerializeToXmlElement(object o)
         {
@@ -60,19 +99,20 @@ namespace ActionEngineModule.ViewModels
             }
             return new System.Xml.XmlNode[1] { doc.DocumentElement.LastChild };
         }
-        private async void Create()
+        private async Task GetSupportedActions()
         {
-            if (actionEngineClient != null)
+            if (actionEngineClient != null && System.Windows.Application.Current.Properties["SupportedActions"] == null)
             {
                 try
                 {
-                    ActionTriggerConfiguration[] tmp = new ActionTriggerConfiguration[1] {
-                        new ActionTriggerConfiguration() { TopicExpression = new TopicExpressionType() {
-                            Any = SerializeToXmlElement("tns1:RecordingConfig/JobState"),
-                            Dialect = "http://docs.oasis-open.org/wsn/t-1/TopicExpression/ConcreteSet" } } };
-                    var task = actionEngineClient.CreateActionTriggersAsync(new CreateActionTriggersRequest() { ActionTrigger = tmp });
+                    var task = actionEngineClient.GetSupportedActionsAsync();
                     await task.ConfigureAwait(false);
-                    UpdateList();
+                    XmlQualifiedName[] tmp = new XmlQualifiedName[task.Result.ActionDescription.Length];
+                    for (int i = 0; i < task.Result.ActionDescription.Length; i++)
+                    {
+                        tmp[i] = task.Result.ActionDescription[i].Name;
+                    }
+                    System.Windows.Application.Current.Properties["SupportedActions"] = tmp;
                 }
                 catch (Exception ex)
                 {
@@ -80,22 +120,13 @@ namespace ActionEngineModule.ViewModels
                 }
             }
         }
-        private async void Edit(tae.Action item)
+        private void Create()
         {
-            if (item != null && actionEngineClient != null)
-            {
-                try
-                {
-                    ActionTrigger[] tmp = new ActionTrigger[1] { new ActionTrigger() };
-                    var task = actionEngineClient.ModifyActionTriggersAsync(tmp);
-                    await task.ConfigureAwait(false);
-                    UpdateList();
-                }
-                catch (Exception ex)
-                {
-                    _eventAggregator.GetEvent<Events.NewStatusEvent>().Publish(ex.Message);
-                }
-            }
+            _eventAggregator.GetEvent<Events.OpenDialogEvent>().Publish(new tae.Action());
+        }
+        private void Edit(tae.Action item)
+        {
+            _eventAggregator.GetEvent<Events.OpenDialogEvent>().Publish(item);
         }
         private async void Delete(tae.Action item)
         {
