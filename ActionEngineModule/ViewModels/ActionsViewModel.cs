@@ -2,17 +2,10 @@
 using Prism.Events;
 using Prism.Mvvm;
 using System;
-using System.Collections.Generic;
 using System.Collections.ObjectModel;
-using System.Linq;
-using System.Net;
-using System.ServiceModel;
-using System.ServiceModel.Channels;
-using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Data;
 using System.Xml;
-using System.Xml.Linq;
 using System.Xml.Serialization;
 using tae;
 
@@ -22,7 +15,8 @@ namespace ActionEngineModule.ViewModels
     class ActionsViewModel : BindableBase
     {
         private IEventAggregator _eventAggregator;
-        private ActionEnginePortClient actionEngineClient;
+        private ActionEnginePortClient actionEngineClient { 
+            get { return (ActionEnginePortClient)System.Windows.Application.Current.Properties["TAEclient"]; } }
         private ObservableCollection<tae.Action> _Actions;
         public ObservableCollection<tae.Action> Actions
         {
@@ -47,12 +41,6 @@ namespace ActionEngineModule.ViewModels
             ea.GetEvent<ActionsUPDEvent>().Subscribe((value) => { Actions.Clear(); Actions.AddRange(value); });
             ea.GetEvent<CreateActionEvent>().Subscribe((value) => CreateActionRequest(value));
             ea.GetEvent<ModifyActionEvent>().Subscribe((value) => ModifyActionRequest(value));
-            while (System.Windows.Application.Current.Properties["TAEclient"] == null)
-            {
-
-            }
-            actionEngineClient = (ActionEnginePortClient)System.Windows.Application.Current.Properties["TAEclient"];
-            GetSupportedActions().ConfigureAwait(false);
         }
         private async void CreateActionRequest(ActionConfiguration item)
         {
@@ -60,10 +48,8 @@ namespace ActionEngineModule.ViewModels
             {
                 try
                 {
-                    var task = actionEngineClient.CreateActionsAsync(new CreateActionsRequest()
-                    {
-                        Action = new ActionConfiguration[1] { item }
-                    });
+                    var req = new CreateActionsRequest(new ActionConfiguration[1] { item });
+                    var task = actionEngineClient.CreateActionsAsync(req);
                     await task.ConfigureAwait(false);
                     UpdateList();
                 }
@@ -90,36 +76,6 @@ namespace ActionEngineModule.ViewModels
                 }
             }
         }
-        public static System.Xml.XmlNode[] SerializeToXmlElement(object o)
-        {
-            System.Xml.XmlDocument doc = new System.Xml.XmlDocument();
-            using (System.Xml.XmlWriter writer = doc.CreateNavigator().AppendChild())
-            {
-                new XmlSerializer(o.GetType()).Serialize(writer, o);
-            }
-            return new System.Xml.XmlNode[1] { doc.DocumentElement.LastChild };
-        }
-        private async Task GetSupportedActions()
-        {
-            if (actionEngineClient != null && System.Windows.Application.Current.Properties["SupportedActions"] == null)
-            {
-                try
-                {
-                    var task = actionEngineClient.GetSupportedActionsAsync();
-                    await task.ConfigureAwait(false);
-                    XmlQualifiedName[] tmp = new XmlQualifiedName[task.Result.ActionDescription.Length];
-                    for (int i = 0; i < task.Result.ActionDescription.Length; i++)
-                    {
-                        tmp[i] = task.Result.ActionDescription[i].Name;
-                    }
-                    System.Windows.Application.Current.Properties["SupportedActions"] = tmp;
-                }
-                catch (Exception ex)
-                {
-                    _eventAggregator.GetEvent<Events.NewStatusEvent>().Publish(ex.Message);
-                }
-            }
-        }
         private void Create()
         {
             _eventAggregator.GetEvent<Events.OpenDialogEvent>().Publish(new tae.Action());
@@ -135,7 +91,7 @@ namespace ActionEngineModule.ViewModels
                 try
                 {
                     string[] tmp = new string[1] { item.Token };
-                    var task = actionEngineClient.DeleteActionTriggersAsync(tmp);
+                    var task = actionEngineClient.DeleteActionsAsync(tmp);
                     await task.ConfigureAwait(false);
                     UpdateList();
                 }

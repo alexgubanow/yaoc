@@ -9,7 +9,9 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ActionEngineModule", "Actio
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ClientApp", "ClientApp\ClientApp.csproj", "{9F76FAD1-585C-46C5-B488-C2B419B115ED}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OnvifClasses", "OnvifClasses\OnvifClasses.csproj", "{056D5E61-4F8D-44CA-960E-12A86BCA37DC}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "OnvifClasses", "OnvifClasses\OnvifClasses.csproj", "{056D5E61-4F8D-44CA-960E-12A86BCA37DC}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "utils", "utils\utils.csproj", "{04EC9A35-7AF4-4B7D-B26B-F79982F8E4FF}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -33,6 +35,10 @@ Global
 		{056D5E61-4F8D-44CA-960E-12A86BCA37DC}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{056D5E61-4F8D-44CA-960E-12A86BCA37DC}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{056D5E61-4F8D-44CA-960E-12A86BCA37DC}.Release|Any CPU.Build.0 = Release|Any CPU
+		{04EC9A35-7AF4-4B7D-B26B-F79982F8E4FF}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{04EC9A35-7AF4-4B7D-B26B-F79982F8E4FF}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{04EC9A35-7AF4-4B7D-B26B-F79982F8E4FF}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{04EC9A35-7AF4-4B7D-B26B-F79982F8E4FF}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

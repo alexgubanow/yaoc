@@ -2,17 +2,9 @@
 using Prism.Events;
 using Prism.Mvvm;
 using System;
-using System.Collections.Generic;
 using System.Collections.ObjectModel;
-using System.Linq;
-using System.Net;
-using System.ServiceModel;
-using System.ServiceModel.Channels;
-using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Data;
-using System.Xml.Linq;
-using System.Xml.Serialization;
 using tae;
 using tev;
 

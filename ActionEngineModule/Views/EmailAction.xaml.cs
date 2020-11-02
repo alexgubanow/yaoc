@@ -10,15 +10,16 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
+using tae;
 
 namespace ActionEngineModule.Views
 {
     /// <summary>
-    /// Interaction logic for EditAction.xaml
+    /// Interaction logic for EditTrigger.xaml
     /// </summary>
-    public partial class EditAction : UserControl
+    public partial class EmailAction : UserControl
     {
-        public EditAction()
+        public EmailAction()
         {
             InitializeComponent();
         }

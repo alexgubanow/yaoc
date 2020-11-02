@@ -1,5 +1,12 @@
 ﻿using Prism.Events;
 using Prism.Mvvm;
+using System.Net;
+using System.ServiceModel;
+using System.ServiceModel.Channels;
+using System.Xml;
+using tae;
+using tds;
+using tev;
 
 namespace ClientApp.ViewModels
 {
@@ -22,9 +29,39 @@ namespace ClientApp.ViewModels
             get => (string)System.Windows.Application.Current.Properties["Endpoint"];
             set
             {
-                System.Windows.Application.Current.Properties["Endpoint"] = value; string tmp = "";
+                System.Windows.Application.Current.Properties["Endpoint"] = value; string tmp = ""; CreateOnvifClients(value);
                 SetProperty(ref tmp, value);
             }
+        }
+        private async void CreateOnvifClients(string ep)
+        {
+            var messageElement = new TextMessageEncodingBindingElement
+            {
+                MessageVersion = MessageVersion.CreateVersion(EnvelopeVersion.Soap12, AddressingVersion.WSAddressing10)
+            };
+            var httpBinding = new HttpTransportBindingElement
+            {
+                AuthenticationScheme = AuthenticationSchemes.Digest
+            };
+            var binding = new CustomBinding(messageElement, httpBinding);
+            var TDSclient = new DeviceClient(binding,new EndpointAddress(ep));
+            var allCapabilitiesTask = TDSclient.GetCapabilitiesAsync(new CapabilityCategory[] { CapabilityCategory.All });
+            await allCapabilitiesTask.ConfigureAwait(false);
+            var mediaAddress = new EndpointAddress(ep);
+            var TEVclient = new EventPortTypeClient(binding, mediaAddress);
+            var TAEclient = new ActionEnginePortClient(binding, mediaAddress);
+
+            var task = TAEclient.GetSupportedActionsAsync();
+            await task.ConfigureAwait(false);
+            XmlQualifiedName[] tmp = new XmlQualifiedName[task.Result.ActionDescription.Length];
+            for (int i = 0; i < task.Result.ActionDescription.Length; i++)
+            {
+                tmp[i] = task.Result.ActionDescription[i].Name;
+            }
+            System.Windows.Application.Current.Properties["SupportedActions"] = tmp;
+            System.Windows.Application.Current.Properties["TAEclient"] = TAEclient;
+            System.Windows.Application.Current.Properties["TEVclient"] = TEVclient;
+            System.Windows.Application.Current.Properties["TDSclient"] = TDSclient;
         }
         public string User
         {
@@ -47,7 +84,7 @@ namespace ClientApp.ViewModels
 
         public MainWindowViewModel(IEventAggregator ea)
         {
-            System.Windows.Application.Current.Properties["Endpoint"] = "http://127.0.0.1:8080/onvif/device_service";
+            Endpoint = "http://127.0.0.1:8080/onvif/device_service";
             ea.GetEvent<Events.NewStatusEvent>().Subscribe((value) => StatusTXT = value);
         }
     }

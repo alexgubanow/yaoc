@@ -8,6 +8,7 @@ using System.Xml;
 using System.Xml.Serialization;
 using tae;
 using tev;
+using utils;
 
 namespace ActionEngineModule.ViewModels
 {
@@ -100,15 +101,6 @@ namespace ActionEngineModule.ViewModels
                 }
             }
         }
-        public static XmlNode[] SerializeToXmlElement(object o)
-        {
-            XmlDocument doc = new XmlDocument();
-            using (XmlWriter writer = doc.CreateNavigator().AppendChild())
-            {
-                new XmlSerializer(o.GetType()).Serialize(writer, o);
-            }
-            return new XmlNode[1] { doc.DocumentElement.LastChild };
-        }
         private void Create(object sender)
         {
             if (IsNew)
@@ -141,11 +133,11 @@ namespace ActionEngineModule.ViewModels
         private tae.QueryExpressionType GetQueryExpressionType()
         {
             tae.QueryExpressionType queryExpressionType = null;
-            if (ContentExpr.Length > 0)
+            if (ContentExpr != null)
             {
                 queryExpressionType = new tae.QueryExpressionType()
                 {
-                    Any = SerializeToXmlElement(ContentExpr),
+                    Any = XML.ToXmlNodeArray(ContentExpr),
                     Dialect = "http://www.onvif.org/ver10/tev/messageContentFilter/ItemFilter"
                 };
             }
@@ -160,7 +152,7 @@ namespace ActionEngineModule.ViewModels
             {
                 topicExpressionType = new tae.TopicExpressionType()
                 {
-                    Any = SerializeToXmlElement(TopicExpr),
+                    Any = XML.ToXmlNodeArray(TopicExpr),
                     Dialect = "http://docs.oasis-open.org/wsn/t-1/TopicExpression/ConcreteSet"
                 };
             }

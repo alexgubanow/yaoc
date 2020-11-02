@@ -9,11 +9,6 @@
              d:DesignHeight="300" d:DesignWidth="300"
              xmlns:prism="http://prismlibrary.com/" xmlns:i="http://schemas.microsoft.com/xaml/behaviors"
              prism:ViewModelLocator.AutoWireViewModel="True" >
-    <i:Interaction.Triggers>
-        <i:EventTrigger EventName="Loaded">
-            <i:InvokeCommandAction Command="{Binding CreateOnvifClientsCMD}" />
-        </i:EventTrigger>
-    </i:Interaction.Triggers>
     <TabControl mah:TabControlHelper.Underlined="TabItems">
         <TabItem Header="Triggers" mah:HeaderedControlHelper.HeaderFontSize="14">
             <ContentControl prism:RegionManager.RegionName="TriggersRegion" />

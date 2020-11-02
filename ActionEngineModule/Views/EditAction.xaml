@@ -1,4 +1,4 @@
-﻿<UserControl x:Class="ActionEngineModule.Views.EditAction"
+﻿<UserControl x:Class="ActionEngineModule.Views.EditAction"       
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
@@ -10,20 +10,29 @@
              prism:ViewModelLocator.AutoWireViewModel="True" >
     <DockPanel LastChildFill="True">
         <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" DockPanel.Dock="Bottom" Margin="5">
-            <Button Command="{Binding OkCMD}" Content="Ok"
-                    CommandParameter="{Binding RelativeSource={RelativeSource AncestorType={x:Type UserControl}}}"
-                    Style="{DynamicResource MahApps.Styles.Button.Dialogs}" />
+            <Button Command="{Binding OkCMD}" Content="Apply"
+                    CommandParameter="{Binding RelativeSource={RelativeSource AncestorType={x:Type UserControl}}}"                    />
             <Button Command="{Binding CloseCMD}"
                     CommandParameter="{Binding RelativeSource={RelativeSource AncestorType={x:Type UserControl}}}"
-                    Content="Cancel" Style="{DynamicResource MahApps.Styles.Button.Dialogs}" Margin="10,0,0,0"/>
+                    Content="Cancel" Margin="10,0,0,0"/>
         </StackPanel>
         <StackPanel Margin="5">
-            <StackPanel>
-                <Label Content="Name:"/>
-                <TextBox Text="{Binding Name}" TextWrapping="Wrap"/>
-                <ComboBox ItemsSource="{Binding ActionTypes}" DisplayMemberPath="Name" Margin="0,5,0,0"
-                          SelectedValue="{Binding SelectedActionType}"/>
-            </StackPanel>
+            <Label Content="Name:"/>
+            <TextBox Text="{Binding Name}" TextWrapping="Wrap"/>
+            <ComboBox ItemsSource="{Binding ActionTypes}" DisplayMemberPath="Name" Margin="0,5,0,0"
+                          SelectedValue="{Binding SelectedActionType}" SelectedIndex="0"/>
+            <local:EmailAction DataContext="{Binding DataContext.EmailVM,
+                RelativeSource={RelativeSource AncestorType={x:Type local:EditAction}}}"
+                               Visibility="{Binding DataContext.EmailActionVisibility,
+                RelativeSource={RelativeSource AncestorType={x:Type local:EditAction}}}"/>
+            <local:FtpAction DataContext="{Binding DataContext.FtpVM,
+                RelativeSource={RelativeSource AncestorType={x:Type local:EditAction}}}"
+                             Visibility="{Binding DataContext.FtpActionVisibility,
+                RelativeSource={RelativeSource AncestorType={x:Type local:EditAction}}}"/>
+            <local:CommandAction DataContext="{Binding DataContext.CommandActionVM,
+                RelativeSource={RelativeSource AncestorType={x:Type local:EditAction}}}"
+                             Visibility="{Binding DataContext.CommandActionVisibility,
+                RelativeSource={RelativeSource AncestorType={x:Type local:EditAction}}}"/>
         </StackPanel>
     </DockPanel>
 </UserControl>

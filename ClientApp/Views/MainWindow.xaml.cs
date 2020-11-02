@@ -1,13 +1,9 @@
-﻿using ActionEngineModule.Views;
-using ActionEngineModule.ViewModels;
+﻿using ActionEngineModule.ViewModels;
+using ActionEngineModule.Views;
 using MahApps.Metro.Controls;
 using MahApps.Metro.Controls.Dialogs;
 using Prism.Events;
-using Prism.Ioc;
-using Prism.Regions;
-using System.Threading.Tasks;
 using System.Windows;
-using System.Windows.Controls;
 
 namespace ClientApp.Views
 {
