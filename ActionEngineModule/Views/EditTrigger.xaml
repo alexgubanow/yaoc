@@ -31,8 +31,8 @@
                             <StackPanel Orientation="Horizontal">
                                 <CheckBox VerticalAlignment="Center" Margin="0,0,4,0" IsChecked="{Binding IsChecked}"
                                           Command="{Binding RelativeSource={RelativeSource AncestorType={x:Type mah:DropDownButton}},
-                                    Path=DataContext.DropDownMenuItemCheckedCMD}"/>
-                                <TextBlock Text="{Binding Data}" VerticalAlignment="Center"/>
+                                    Path=DataContext.TopicsItemCheckedCMD}"/>
+                                <TextBlock Text="{Binding Name}" VerticalAlignment="Center"/>
                             </StackPanel>
                         </DataTemplate>
                     </mah:DropDownButton.ItemTemplate>
@@ -42,14 +42,23 @@
                 <Label Content="Content expression:"/>
                 <TextBox Text="{Binding ContentExpr}" TextWrapping="Wrap"/>
                 <mah:DropDownButton Content="Choose actions from list" 
-                          ItemsSource="{Binding Topics}">
+                          ItemsSource="{Binding ActionTokens}">
                     <mah:DropDownButton.ItemTemplate>
                         <DataTemplate>
                             <StackPanel Orientation="Horizontal">
                                 <CheckBox VerticalAlignment="Center" Margin="0,0,4,0" IsChecked="{Binding IsChecked}"
                                           Command="{Binding RelativeSource={RelativeSource AncestorType={x:Type mah:DropDownButton}},
-                                    Path=DataContext.DropDownMenuItemCheckedCMD}"/>
-                                <TextBlock Text="{Binding Data}" VerticalAlignment="Center"/>
+                                    Path=DataContext.ActionTokensItemCheckedCMD}"/>
+                                <StackPanel>
+                                    <StackPanel Orientation="Horizontal">
+                                        <Label Content="Token:"/>
+                                        <Label Content="{Binding Token}" />
+                                    </StackPanel>
+                                    <StackPanel Orientation="Horizontal">
+                                        <Label Content="Name:"/>
+                                        <Label Content="{Binding Name}" />
+                                    </StackPanel>
+                                </StackPanel>
                             </StackPanel>
                         </DataTemplate>
                     </mah:DropDownButton.ItemTemplate>

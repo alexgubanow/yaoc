@@ -35,6 +35,10 @@ namespace ClientApp.Views
                 {
                     title = "Edit trigger: " + data.Token;
                     dc.Token = data.Token;
+                    if (data.Configuration.ActionToken != null)
+                    {
+                        dc.Actions = data.Configuration.ActionToken;
+                    }
                     if (data.Configuration.TopicExpression != null)
                     {
                         dc.TopicExpr = TopicExpressionToString.ToString(data.Configuration.TopicExpression.Any);
