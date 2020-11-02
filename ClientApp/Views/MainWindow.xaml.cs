@@ -62,6 +62,18 @@ namespace ClientApp.Views
                     dc.Token = data.Token;
                     dc.Name = data.Configuration.Name;
                     dc.SelectedActionType = data.Configuration.Type;
+                    switch (dc.SelectedActionType.Name)
+                    {
+                        case "CommandAction":
+                            dc.CommandActionVM.ParseItemList(data.Configuration.Parameters);
+                            break;
+                        case "FtpAction":
+                            dc.FtpVM.ParseItemList(data.Configuration.Parameters);
+                            break;
+                        case "EMailAction":
+                            dc.EmailVM.ParseItemList(data.Configuration.Parameters);
+                            break;
+                    }
                 }
                 else
                 {

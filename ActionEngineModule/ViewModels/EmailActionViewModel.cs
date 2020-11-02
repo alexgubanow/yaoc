@@ -1,4 +1,5 @@
 ﻿using Prism.Mvvm;
+using System;
 using System.Text;
 using System.Xml.Serialization;
 using tae;
@@ -95,6 +96,53 @@ namespace ActionEngineModule.ViewModels
                 new ItemListElementItem() { Name = "Body", Any = XML.ToXmlElement(Body)}
             }
             };
+        }
+
+        public void ParseItemList(ItemList parameters)
+        {
+            foreach (var item in parameters.SimpleItem)
+            {
+                if (item.Name == "Sender")
+                {
+                    SenderEmail = item.Value;
+                }
+                else if (item.Name == "Subject")
+                {
+                    Topic = item.Value;
+                }
+            }
+            foreach (var item in parameters.ElementItem)
+            {
+                if (item.Name == "Destinations")
+                {
+                    object obj = new EMailServerConfiguration();
+                    XML.XmlElementToObject(item.Any.OuterXml, ref obj);
+                    if (obj != null)
+                    {
+                        SMTPServer = (obj as EMailServerConfiguration).SMTPConfig.HostAddress.Value;
+                        SMTPUser = (obj as EMailServerConfiguration).AuthenticationConfig.User.username;
+                        SMTPPassword = Encoding.ASCII.GetString((obj as EMailServerConfiguration).AuthenticationConfig.User.password);
+                    }
+                }
+                else if (item.Name == "Receivers")
+                {
+                    object obj = new EMailReceiverConfiguration();
+                    XML.XmlElementToObject(item.Any.OuterXml, ref obj);
+                    if (obj != null)
+                    {
+                        DestinationEmail = string.Join(",", (obj as EMailReceiverConfiguration).TO);
+                    }
+                }
+                else if (item.Name == "Body")
+                {
+                    object obj = new EMailBodyTextConfiguration();
+                    XML.XmlElementToObject(item.Any.OuterXml, ref obj);
+                    if (obj != null)
+                    {
+                        Message = (obj as EMailBodyTextConfiguration).type;
+                    }
+                }
+            }
         }
     }
 }

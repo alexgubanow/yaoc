@@ -17,6 +17,8 @@
         <TextBox Text="{Binding Username}" TextWrapping="Wrap"/>
         <Label Content="Password:"/>
         <TextBox Text="{Binding Passwd}" TextWrapping="Wrap"/>
+        <Label Content="Upload path:"/>
+        <TextBox Text="{Binding UploadPath}" TextWrapping="Wrap"/>
         <Label Content="Destination file name:"/>
         <TextBox Text="{Binding DestinationFileName}" TextWrapping="Wrap"/>
     </StackPanel>

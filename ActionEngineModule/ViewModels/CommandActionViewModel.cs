@@ -53,5 +53,31 @@ namespace ActionEngineModule.ViewModels
             }
             };
         }
+        public void ParseItemList(ItemList paramList)
+        {
+            foreach (var item in paramList.SimpleItem)
+            {
+                if (item.Name == "XAddr")
+                {
+                    XAddr = item.Value;
+                }
+                else if (item.Name == "FtpContent")
+                {
+                    Operation = item.Value;
+                }
+            }
+            foreach (var item in paramList.ElementItem)
+            {
+                if (item.Name == "Parameters")
+                {
+                    object Parameters = new tt.AnyHolder();
+                    XML.XmlElementToObject(item.Any.OuterXml, ref Parameters);
+                    if (Parameters != null)
+                    {
+                        Request = (Parameters as tt.AnyHolder).Any[0].InnerXml;
+                    }
+                }
+            }
+        }
     }
 }
