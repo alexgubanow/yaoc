@@ -1,9 +1,12 @@
 ﻿using Prism.Commands;
 using Prism.Events;
 using Prism.Mvvm;
+using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
+using System.Threading.Tasks;
+using System.Windows;
 using System.Xml;
 using System.Xml.Serialization;
 using tae;
@@ -21,10 +24,11 @@ namespace ActionEngineModule.ViewModels
     }
     public class EditTriggerViewModel : BindableBase
     {
-        private readonly IEventAggregator _eventAggregator;
+        private readonly IEventAggregator _ea;
         public DelegateCommand<object> OkCMD { get; private set; }
         public DelegateCommand<object> CloseCMD { get; private set; }
         public DelegateCommand DropDownMenuItemCheckedCMD { get; private set; }
+        public DelegateCommand LoadedCMD { get; private set; }
 
         private string _Token;
         public string Token
@@ -59,13 +63,28 @@ namespace ActionEngineModule.ViewModels
 
         EditTriggerViewModel(IEventAggregator ea)
         {
-            _eventAggregator = ea;
+            _ea = ea;
             OkCMD = new DelegateCommand<object>(Create);
             CloseCMD = new DelegateCommand<object>(Close);
             DropDownMenuItemCheckedCMD = new DelegateCommand(TopicsToString);
-            var evpr = (GetEventPropertiesResponse)System.Windows.Application.Current.Properties["EventProperties"];
+            LoadedCMD = new DelegateCommand(UpdateTopicsList);
+        }
+
+        private async void UpdateTopicsList()
+        {
             var rawTopics = new List<Topic>();
-            foreach (var item in evpr.TopicSet.Any)
+            try
+            {
+                var task = ((EventPortTypeClient)Application.Current.Properties["TEVclient"])
+                    .GetEventPropertiesAsync(new GetEventPropertiesRequest());
+                await task.ConfigureAwait(false);
+                System.Windows.Application.Current.Properties["EventProperties"] = task.Result;
+            }
+            catch (Exception ex)
+            {
+                _ea.GetEvent<Events.NewStatusEvent>().Publish(ex.Message);
+            }
+            foreach (var item in ((GetEventPropertiesResponse)System.Windows.Application.Current.Properties["EventProperties"]).TopicSet.Any)
             {
                 rawTopics.Add(new Topic() { IsChecked = false, Data = item.Name + "//." });
                 foreach (XmlElement childTopic in item.ChildNodes)
@@ -74,7 +93,12 @@ namespace ActionEngineModule.ViewModels
                 }
             }
             Topics = new ObservableCollection<Topic>(rawTopics);
+            if (!IsNew)
+            {
+                SetUsedTopicsFromString(TopicExpr);
+            }
         }
+
         public void TopicsToString()
         {
             string b = "";
@@ -111,7 +135,7 @@ namespace ActionEngineModule.ViewModels
                         TopicExpression = GetTopicExpressionType(),
                         ContentExpression = GetQueryExpressionType()
                     };
-                _eventAggregator.GetEvent<CreateTriggerEvent>().Publish(item);
+                _ea.GetEvent<CreateTriggerEvent>().Publish(item);
             }
             else
             {
@@ -125,7 +149,7 @@ namespace ActionEngineModule.ViewModels
                         },
                         Token = Token
                     };
-                _eventAggregator.GetEvent<ModifyTriggerEvent>().Publish(item);
+                _ea.GetEvent<ModifyTriggerEvent>().Publish(item);
             }
             Close(sender);
         }
@@ -162,7 +186,7 @@ namespace ActionEngineModule.ViewModels
 
         private void Close(object sender)
         {
-            _eventAggregator.GetEvent<Events.CloseDialogEvent>().Publish(sender);
+            _ea.GetEvent<Events.CloseDialogEvent>().Publish(sender);
         }
     }
 }

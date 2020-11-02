@@ -14,7 +14,6 @@ namespace ActionEngineModule.ViewModels
     class TriggersViewModel : BindableBase
     {
         private IEventAggregator _eventAggregator;
-        private ActionEnginePortClient actionEngineClient;
         private ObservableCollection<ActionTrigger> _Triggers;
         public ObservableCollection<ActionTrigger> Triggers
         {
@@ -40,43 +39,21 @@ namespace ActionEngineModule.ViewModels
             ea.GetEvent<TriggersUPDEvent>().Subscribe((value) => { Triggers.Clear(); Triggers.AddRange(value); });
             ea.GetEvent<CreateTriggerEvent>().Subscribe((value) => CreateActionTriggerRequest(value));
             ea.GetEvent<ModifyTriggerEvent>().Subscribe((value) => ModifyActionTriggerRequest(value));
-            while (System.Windows.Application.Current.Properties["TAEclient"] == null)
-            {
-
-            }
-            actionEngineClient = (ActionEnginePortClient)System.Windows.Application.Current.Properties["TAEclient"];
-            GetEventProperties().ConfigureAwait(false);
         }
         private void Create()
         {
             _eventAggregator.GetEvent<Events.OpenDialogEvent>().Publish(new ActionTrigger());
         }
 
-        private async Task GetEventProperties()
-        {
-            if (actionEngineClient != null && System.Windows.Application.Current.Properties["EventProperties"] == null)
-            {
-                try
-                {
-                    var tevClient = (EventPortTypeClient)System.Windows.Application.Current.Properties["TEVclient"];
-                    var task = tevClient.GetEventPropertiesAsync(new GetEventPropertiesRequest());
-                    await task.ConfigureAwait(false);
-                    System.Windows.Application.Current.Properties["EventProperties"] = task.Result;
-                }
-                catch (Exception ex)
-                {
-                    _eventAggregator.GetEvent<Events.NewStatusEvent>().Publish(ex.Message);
-                }
-            }
-        }
 
         private async void CreateActionTriggerRequest(ActionTriggerConfiguration item)
         {
-            if (actionEngineClient != null && item != null)
+            if ((ActionEnginePortClient)System.Windows.Application.Current.Properties["TAEclient"] != null && item != null)
             {
                 try
                 {
-                    var task = actionEngineClient.CreateActionTriggersAsync(new CreateActionTriggersRequest()
+                    var task = ((ActionEnginePortClient)System.Windows.Application.Current.Properties["TAEclient"])
+                        .CreateActionTriggersAsync(new CreateActionTriggersRequest()
                     {
                         ActionTrigger = new ActionTriggerConfiguration[1] { item }
                     });
@@ -95,12 +72,13 @@ namespace ActionEngineModule.ViewModels
         }
         private async void ModifyActionTriggerRequest(ActionTrigger item)
         {
-            if (item != null && actionEngineClient != null)
+            if (item != null && (ActionEnginePortClient)System.Windows.Application.Current.Properties["TAEclient"] != null)
             {
                 try
                 {
                     ActionTrigger[] tmp = new ActionTrigger[1] { item };
-                    var task = actionEngineClient.ModifyActionTriggersAsync(tmp);
+                    var task = ((ActionEnginePortClient)System.Windows.Application.Current.Properties["TAEclient"])
+                        .ModifyActionTriggersAsync(tmp);
                     await task.ConfigureAwait(false);
                     UpdateList();
                 }
@@ -112,12 +90,13 @@ namespace ActionEngineModule.ViewModels
         }
         private async void Delete(ActionTrigger item)
         {
-            if (item != null && actionEngineClient != null)
+            if (item != null && (ActionEnginePortClient)System.Windows.Application.Current.Properties["TAEclient"] != null)
             {
                 try
                 {
                     string[] tmp = new string[1] { item.Token };
-                    var task = actionEngineClient.DeleteActionTriggersAsync(tmp);
+                    var task = ((ActionEnginePortClient)System.Windows.Application.Current.Properties["TAEclient"])
+                        .DeleteActionTriggersAsync(tmp);
                     await task.ConfigureAwait(false);
                     UpdateList();
                 }
@@ -131,7 +110,8 @@ namespace ActionEngineModule.ViewModels
         {
             try
             {
-                var GetActionTriggersTask = actionEngineClient.GetActionTriggersAsync();
+                var GetActionTriggersTask = ((ActionEnginePortClient)System.Windows.Application.Current.Properties["TAEclient"])
+                    .GetActionTriggersAsync();
                 await GetActionTriggersTask.ConfigureAwait(false);
                 _eventAggregator.GetEvent<TriggersUPDEvent>().Publish(GetActionTriggersTask.Result.ActionTrigger);
             }

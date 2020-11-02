@@ -10,17 +10,12 @@
             <StatusBarItem Content="{Binding StatusTXT}" Height="30"/>
         </StatusBar>
         <StackPanel Orientation="Horizontal" DockPanel.Dock="Top">
-            <StatusBarItem>
-                <lcl:lblTextBox Header="Endpoint" lblWidth="120" lblText="{Binding Endpoint}"/>
-            </StatusBarItem>
-            <StatusBarItem>
-                <lcl:lblTextBox Header="User" lblWidth="80" lblText="{Binding User}"/>
-            </StatusBarItem>
-            <StatusBarItem>
-                <lcl:lblTextBox Header="Password" lblWidth="80" lblText="{Binding Password}"/>
-            </StatusBarItem>
+            <lcl:lblTextBox Header="Endpoint" lblWidth="120" lblText="{Binding Endpoint}" Margin="0,5,5,5"/>
+            <lcl:lblTextBox Header="User" lblWidth="80" lblText="{Binding User}" Margin="0,5,5,5"/>
+            <lcl:lblTextBox Header="Password" lblWidth="80" lblText="{Binding Password}" Margin="0,5,5,5"/>
+            <Button Content="Connect" Command="{Binding ConnectCMD}" Margin="0,5,5,5"/>
         </StackPanel>
-        <TabControl TabStripPlacement="Left" mah:TabControlHelper.Underlined="TabItems" >
+        <TabControl TabStripPlacement="Left" mah:TabControlHelper.Underlined="TabItems" Visibility="{Binding TabsVisibility}">
             <TabItem Header="ActionEngine" mah:HeaderedControlHelper.HeaderFontSize="14" >
                 <ContentControl prism:RegionManager.RegionName="ActionEngineRegion" />
             </TabItem>

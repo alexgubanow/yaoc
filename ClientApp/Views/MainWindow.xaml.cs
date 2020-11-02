@@ -38,7 +38,6 @@ namespace ClientApp.Views
                     if (data.Configuration.TopicExpression != null)
                     {
                         dc.TopicExpr = TopicExpressionToString.ToString(data.Configuration.TopicExpression.Any);
-                        dc.SetUsedTopicsFromString(dc.TopicExpr);
                     }
                     if (data.Configuration.ContentExpression != null)
                     {
@@ -50,9 +49,8 @@ namespace ClientApp.Views
                     title = "Create new trigger";
                 }
             }
-            else if (item is tae.Action)
+            else if (item is tae.Action data)
             {
-                tae.Action data = (tae.Action)item;
                 control = new EditAction();
                 var dc = ((control as EditAction).DataContext as EditActionViewModel);
                 dc.IsNew = data.Token == null;
@@ -86,7 +84,7 @@ namespace ClientApp.Views
             }
             var dialog = new CustomDialog(new MetroDialogSettings() { AnimateHide = false, AnimateShow = false })
             { Content = control, Title = title, DialogTitleFontSize = 18 };
-
+            
             await this.ShowMetroDialogAsync(dialog);
             await dialog.WaitUntilUnloadedAsync();
         }
