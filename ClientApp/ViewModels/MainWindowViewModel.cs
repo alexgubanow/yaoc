@@ -7,13 +7,13 @@ using System.ServiceModel.Channels;
 using System.Windows;
 using System.Xml;
 using tae;
-using tds;
 using tev;
 
 namespace ClientApp.ViewModels
 {
     public class MainWindowViewModel : BindableBase
     {
+        private IEventAggregator _ea;
         private string _title = "Yet Another Onvif Client";
         public string Title
         {
@@ -60,6 +60,7 @@ namespace ClientApp.ViewModels
 
         public MainWindowViewModel(IEventAggregator ea)
         {
+            _ea = ea;
             ea.GetEvent<Events.NewStatusEvent>().Subscribe((value) => StatusTXT = value);
             ConnectCMD = new DelegateCommand(CreateOnvifClients);
         }
@@ -78,26 +79,40 @@ namespace ClientApp.ViewModels
             {
                 AuthenticationScheme = AuthenticationSchemes.Digest
             };
-            var binding = new CustomBinding(messageElement, httpBinding);
-            var TDSclient = new DeviceClient(binding, new EndpointAddress(Endpoint));
-            var allCapabilitiesTask = TDSclient.GetCapabilitiesAsync(new CapabilityCategory[] { CapabilityCategory.All });
-            await allCapabilitiesTask.ConfigureAwait(false);
-            var mediaAddress = new EndpointAddress(Endpoint);
-            var TEVclient = new EventPortTypeClient(binding, mediaAddress);
-            var TAEclient = new ActionEnginePortClient(binding, mediaAddress);
-
-            var task = TAEclient.GetSupportedActionsAsync();
-            await task.ConfigureAwait(false);
-            XmlQualifiedName[] tmp = new XmlQualifiedName[task.Result.ActionDescription.Length];
-            for (int i = 0; i < task.Result.ActionDescription.Length; i++)
+            var binding = new CustomBinding(messageElement, httpBinding)
             {
-                tmp[i] = task.Result.ActionDescription[i].Name;
+                CloseTimeout = System.TimeSpan.FromMilliseconds(500),
+                SendTimeout = System.TimeSpan.FromMilliseconds(500),
+                OpenTimeout = System.TimeSpan.FromMilliseconds(500),
+                ReceiveTimeout = System.TimeSpan.FromMilliseconds(500)
+            };
+            try
+            {
+                //var TDSclient = new DeviceClient(binding, new EndpointAddress(Endpoint));
+                //System.Windows.Application.Current.Properties["TDSclient"] = TDSclient;
+                //var allCapabilitiesTask = TDSclient.GetCapabilitiesAsync(new CapabilityCategory[] { CapabilityCategory.All });
+                //await allCapabilitiesTask.ConfigureAwait(false);
+                //var devCaps = allCapabilitiesTask.Result.Capabilities;
+                var TEVclient = new EventPortTypeClient(binding, new EndpointAddress(Endpoint));
+                var TAEclient = new ActionEnginePortClient(binding, new EndpointAddress(Endpoint));
+
+                var task = TAEclient.GetSupportedActionsAsync();
+                await task.ConfigureAwait(false);
+                XmlQualifiedName[] tmp = new XmlQualifiedName[task.Result.ActionDescription.Length];
+                for (int i = 0; i < task.Result.ActionDescription.Length; i++)
+                {
+                    tmp[i] = task.Result.ActionDescription[i].Name;
+                }
+                System.Windows.Application.Current.Properties["SupportedActions"] = tmp;
+                System.Windows.Application.Current.Properties["TAEclient"] = TAEclient;
+                System.Windows.Application.Current.Properties["TEVclient"] = TEVclient;
+                TabsVisibility = Visibility.Visible;
             }
-            System.Windows.Application.Current.Properties["SupportedActions"] = tmp;
-            System.Windows.Application.Current.Properties["TAEclient"] = TAEclient;
-            System.Windows.Application.Current.Properties["TEVclient"] = TEVclient;
-            System.Windows.Application.Current.Properties["TDSclient"] = TDSclient;
-            TabsVisibility = Visibility.Visible;
+            catch (System.Exception ex)
+            {
+                TabsVisibility = Visibility.Collapsed;
+                _ea.GetEvent<Events.NewStatusEvent>().Publish(ex.Message);
+            }
         }
     }
 }
