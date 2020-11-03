@@ -61,7 +61,7 @@ namespace ActionEngineModule.ViewModels
                 {
                     XAddr = item.Value;
                 }
-                else if (item.Name == "FtpContent")
+                else if (item.Name == "Operation")
                 {
                     Operation = item.Value;
                 }
@@ -70,11 +70,9 @@ namespace ActionEngineModule.ViewModels
             {
                 if (item.Name == "Parameters")
                 {
-                    object Parameters = new tt.AnyHolder();
-                    XML.XmlElementToObject(item.Any.OuterXml, ref Parameters);
-                    if (Parameters != null)
+                    if (item.Any != null)
                     {
-                        Request = (Parameters as tt.AnyHolder).Any[0].InnerXml;
+                        Request = item.Any.InnerText;
                     }
                 }
             }
