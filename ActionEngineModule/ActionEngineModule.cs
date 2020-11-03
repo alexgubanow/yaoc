@@ -13,6 +13,7 @@ namespace ActionEngineModule
             regionManager.RegisterViewWithRegion("ActionEngineRegion", typeof(ActionEngine));
             regionManager.RegisterViewWithRegion("TriggersRegion", typeof(Triggers));
             regionManager.RegisterViewWithRegion("ActionsRegion", typeof(Actions));
+            regionManager.RegisterViewWithRegion("ActionTriggerSeqRegion", typeof(ActionTriggerSeq));
         }
 
         public void RegisterTypes(IContainerRegistry containerRegistry)

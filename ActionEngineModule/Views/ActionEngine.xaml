@@ -7,7 +7,9 @@
              xmlns:mah="http://metro.mahapps.com/winfx/xaml/controls"
              mc:Ignorable="d" 
              d:DesignHeight="300" d:DesignWidth="300"
-             xmlns:prism="http://prismlibrary.com/" xmlns:i="http://schemas.microsoft.com/xaml/behaviors"
+             xmlns:viewmodels="clr-namespace:ActionEngineModule.ViewModels"
+             d:DataContext="{d:DesignInstance Type=viewmodels:ActionEngineViewModel}"
+             xmlns:prism="http://prismlibrary.com/"
              prism:ViewModelLocator.AutoWireViewModel="True" >
     <TabControl mah:TabControlHelper.Underlined="TabItems">
         <TabItem Header="Triggers" mah:HeaderedControlHelper.HeaderFontSize="14">
@@ -15,6 +17,9 @@
         </TabItem>
         <TabItem Header="Actions" mah:HeaderedControlHelper.HeaderFontSize="14">
             <ContentControl prism:RegionManager.RegionName="ActionsRegion" />
+        </TabItem>
+        <TabItem Header="ActionTrigger sequences" mah:HeaderedControlHelper.HeaderFontSize="14">
+            <ContentControl prism:RegionManager.RegionName="ActionTriggerSeqRegion" />
         </TabItem>
     </TabControl>
 </UserControl>
