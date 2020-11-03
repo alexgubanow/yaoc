@@ -10,7 +10,7 @@
             <StatusBarItem Content="{Binding StatusTXT}" Height="30"/>
         </StatusBar>
         <StackPanel Orientation="Horizontal" DockPanel.Dock="Top">
-            <lcl:lblTextBox Header="Endpoint" lblWidth="120" lblText="{Binding Endpoint}" Margin="0,5,5,5"/>
+            <lcl:lblTextBox Header="Endpoint" lblWidth="120" lblText="{Binding Endpoint, Mode=TwoWay}" Margin="0,5,5,5"/>
             <lcl:lblTextBox Header="User" lblWidth="80" lblText="{Binding User}" Margin="0,5,5,5"/>
             <lcl:lblTextBox Header="Password" lblWidth="80" lblText="{Binding Password}" Margin="0,5,5,5"/>
             <Button Content="Connect" Command="{Binding ConnectCMD}" Margin="0,5,5,5"/>

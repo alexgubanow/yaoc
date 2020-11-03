@@ -32,14 +32,11 @@ namespace ClientApp.ViewModels
             get { return _TabsVisibility; }
             set { SetProperty(ref _TabsVisibility, value); }
         }
+        private string _Endpoint = "http://127.0.0.1:8080/onvif/device_service";
         public string Endpoint
         {
-            get => (string)System.Windows.Application.Current.Properties["Endpoint"];
-            set
-            {
-                System.Windows.Application.Current.Properties["Endpoint"] = value; string tmp = "";
-                SetProperty(ref tmp, value);
-            }
+            get { return _Endpoint; }
+            set { SetProperty(ref _Endpoint, value); }
         }
         public string User
         {
@@ -63,7 +60,6 @@ namespace ClientApp.ViewModels
 
         public MainWindowViewModel(IEventAggregator ea)
         {
-            Endpoint = "http://127.0.0.1:8080/onvif/device_service";
             ea.GetEvent<Events.NewStatusEvent>().Subscribe((value) => StatusTXT = value);
             ConnectCMD = new DelegateCommand(CreateOnvifClients);
         }
