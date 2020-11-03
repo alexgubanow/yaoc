@@ -4,6 +4,7 @@ using Prism.Mvvm;
 using System.Net;
 using System.ServiceModel;
 using System.ServiceModel.Channels;
+using System.ServiceModel.Security;
 using System.Windows;
 using System.Xml;
 using tae;
@@ -95,7 +96,10 @@ namespace ClientApp.ViewModels
                 //var devCaps = allCapabilitiesTask.Result.Capabilities;
                 var TEVclient = new EventPortTypeClient(binding, new EndpointAddress(Endpoint));
                 var TAEclient = new ActionEnginePortClient(binding, new EndpointAddress(Endpoint));
-
+                TEVclient.ClientCredentials.UserName.UserName = User;
+                TEVclient.ClientCredentials.UserName.Password = Password;
+                TAEclient.ClientCredentials.UserName.UserName = User;
+                TAEclient.ClientCredentials.UserName.Password = Password;
                 var task = TAEclient.GetSupportedActionsAsync();
                 await task.ConfigureAwait(false);
                 XmlQualifiedName[] tmp = new XmlQualifiedName[task.Result.ActionDescription.Length];
