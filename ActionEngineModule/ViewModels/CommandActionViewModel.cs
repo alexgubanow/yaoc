@@ -45,11 +45,9 @@ namespace ActionEngineModule.ViewModels
             },
                 ElementItem = new ItemListElementItem[1]
             {
-                new ItemListElementItem() { Name = "Parameters", 
-                    Any = XML.ToXmlElement(new tt.AnyHolder()
-                    {
-                        Any = new System.Xml.XmlElement[1] { XML.ToXmlElement(Request.Replace('\r', ' ').Replace('\n', ' ').Replace('\t', ' ')) }
-                    })}
+                new ItemListElementItem() { Name = "Parameters",
+                    Any = XML.ToXmlElement(
+                        XML.XmlElementToObject(Request.Replace('\r', ' ').Replace('\n', ' ').Replace('\t', ' '), Operation))}
             }
             };
         }

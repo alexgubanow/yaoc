@@ -28,7 +28,8 @@ namespace ActionEngineModule.ViewModels
         private readonly IEventAggregator _ea;
         public DelegateCommand<object> OkCMD { get; private set; }
         public DelegateCommand<object> CloseCMD { get; private set; }
-        public DelegateCommand DropDownMenuItemCheckedCMD { get; private set; }
+        public DelegateCommand TopicsItemCheckedCMD { get; private set; }
+        public DelegateCommand ActionTokensItemCheckedCMD { get; private set; }
         public DelegateCommand LoadedCMD { get; private set; }
         private ActionEnginePortClient taeClient
         {
@@ -87,12 +88,10 @@ namespace ActionEngineModule.ViewModels
             _ea = ea;
             OkCMD = new DelegateCommand<object>(Create);
             CloseCMD = new DelegateCommand<object>(Close);
-            DropDownMenuItemCheckedCMD = new DelegateCommand(TopicsToString);
-            LoadedCMD = new DelegateCommand(UpdateTopicsList);
-            LoadedCMD = new DelegateCommand(UpdateActionTokensList);
+            TopicsItemCheckedCMD = new DelegateCommand(TopicsToString);
+            LoadedCMD = new DelegateCommand(OnLoaded);
         }
-
-        private async void UpdateTopicsList()
+        private async void OnLoaded()
         {
             var rawTopics = new List<DropDownCheckableItem>();
             try
@@ -111,6 +110,17 @@ namespace ActionEngineModule.ViewModels
                 foreach (XmlElement childTopic in item.ChildNodes)
                 {
                     rawTopics.Add(new DropDownCheckableItem() { IsChecked = false, Name = item.Name + "/" + childTopic.Name });
+                    foreach (XmlElement subChildTopic in childTopic.ChildNodes)
+                    {
+                        if (!subChildTopic.Name.StartsWith("tt:"))
+                        {
+                            rawTopics.Add(new DropDownCheckableItem()
+                            {
+                                IsChecked = false,
+                                Name = item.Name + "/" + childTopic.Name + "/" + subChildTopic.Name
+                            });
+                        }
+                    }
                 }
             }
             Topics = new ObservableCollection<DropDownCheckableItem>(rawTopics);
@@ -118,9 +128,6 @@ namespace ActionEngineModule.ViewModels
             {
                 SetUsedTopicsFromString(TopicExpr);
             }
-        }
-        private async void UpdateActionTokensList()
-        {
             var list = new List<DropDownCheckableItem>();
             try
             {
@@ -142,7 +149,6 @@ namespace ActionEngineModule.ViewModels
                 SetUsedActionsFromString(Actions);
             }
         }
-
         public void TopicsToString()
         {
             string b = "";
