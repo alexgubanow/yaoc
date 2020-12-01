@@ -18,27 +18,35 @@ namespace utils
             {
                 case "trt:GetSnapshotUri":
                     tmp = new trt.GetSnapshotUri();
-                    XmlElementToObject(xml, ref tmp);
+                    break;
+                case "http://www.onvif.org/ver10/media/wsdl:GetSnapshotUri":
+                    tmp = new trt.GetSnapshotUri();
                     break;
                 case "tptz:OperatePresetTour":
                     tmp = new tptz.OperatePresetTour();
-                    XmlElementToObject(xml, ref tmp);
                     break;
                 case "tptz:GotoPreset":
                     tmp = new tptz.GotoPreset();
-                    XmlElementToObject(xml, ref tmp);
                     break;
             }
+            XmlElementToObject(xml, ref tmp);
             return tmp;
         }
         public static void XmlElementToObject(string xml, ref object Destinations)
         {
-            if (xml.Length > 0)
+            if (xml.Length > 0 && Destinations != null)
             {
                 using (var sr = new StringReader(xml))
                 {
                     XmlSerializer xs = new XmlSerializer(Destinations.GetType());
-                    Destinations = xs.Deserialize(sr);
+                    try
+                    {
+                        Destinations = xs.Deserialize(sr);
+                    }
+                    catch (Exception)
+                    {
+
+                    }
                 }
             }
         }
